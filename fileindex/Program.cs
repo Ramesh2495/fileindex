@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace fileindex
@@ -13,13 +14,16 @@ namespace fileindex
         static void Main(string[] args)
 
         {
-            Console.WriteLine("Input search pattern:");
+            Console.WriteLine("Enter input search pattern:");
             string ACCDir = Console.ReadLine();
             string pattern = "*";
             List<string> allDirectories = new List<string> { ACCDir };
             Stack<string> directories = new Stack<string>(allDirectories);
             List<string[]> allFiles = new List<string[]>();
             Directorypattern = ACCDir;
+            DirectoryInfo di = new DirectoryInfo(ACCDir);
+            if (di.Exists)
+            {         
             while (directories.Count > 0)
             {
                 try
@@ -30,7 +34,8 @@ namespace fileindex
                     int TotalFilecount = 0;
 
                     string Accfilesize = "";
-                    foreach (string dir in Directory.GetDirectories(directories.Pop()))
+                   
+                        foreach (string dir in Directory.GetDirectories(directories.Pop()))
                     {
                         directories.Push(dir);
                         allDirectories.Add(dir);
@@ -38,7 +43,7 @@ namespace fileindex
                         {
                             allFiles.Add(Directory.GetFiles(dir, pattern, SearchOption.TopDirectoryOnly));
                             var CurrentFile = Directory.GetFiles(dir, pattern, SearchOption.TopDirectoryOnly);
-                            Parallel.ForEach(CurrentFile, s =>
+                            Parallel.ForEach(CurrentFile, s => // To perform parallel task 
                             {
                                 string fileName = s;
                                 FileInfo fi = new FileInfo(fileName);
@@ -70,6 +75,13 @@ namespace fileindex
             }
             Console.WriteLine("Press any key to exit");
             Console.ReadLine();
+            }
+            else
+            {
+                Console.WriteLine("Folder pattern not found please check and run again");
+                Thread.Sleep(4000);
+
+            }
         }
         static void QueryDuplicates(string ACCDir)
         {
@@ -89,7 +101,6 @@ namespace fileindex
                 where fileGroup.Count() > 1
                 select fileGroup;
 
-            // output one page at a time.  
             PageOutput<string, string>(queryDupNames);
         }
 
